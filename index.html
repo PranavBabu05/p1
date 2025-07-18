@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Movie Finder</title>
+    <style>
+      /* Global Styles */
+      body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+
+      header {
+        background-color: #ff6f61;
+        color: white;
+        text-align: center;
+        padding: 30px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 3rem;
+      }
+
+      header p {
+        font-size: 1.2rem;
+      }
+
+      .search-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .search-container input {
+        width: 80%;
+        max-width: 500px;
+        padding: 15px;
+        font-size: 18px;
+        border-radius: 5px;
+        border: 2px solid #ddd;
+        outline: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .movie-list {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin: 40px;
+        padding: 0 20px;
+        transition: transform 0.3s ease;
+      }
+
+      .movie-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .movie-card:hover {
+        transform: scale(1.05);
+      }
+
+      .movie-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .movie-card h3 {
+        margin: 10px 0;
+        font-size: 1.3rem;
+      }
+
+      .movie-card p {
+        color: #555;
+        font-size: 1rem;
+      }
+
+      /* Movie Details */
+      .movie-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        background-color: #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+        border-radius: 10px;
+      }
+
+      .movie-details img {
+        width: 300px;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .movie-details h2 {
+        font-size: 2rem;
+        margin: 10px 0;
+      }
+
+      .movie-details p {
+        font-size: 1.1rem;
+        color: #555;
+        margin: 5px 0;
+      }
+
+      .movie-details .back-button {
+        background-color: #ff6f61;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 1rem;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .movie-list {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Movie Finder</h1>
+      <p>Search for your favorite movies and get details!</p>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="search-box"
+        placeholder="Search for a movie..."
+        oninput="searchMovie()"
+      />
+    </div>
+
+    <!-- Movie List Section -->
+    <div id="app" class="movie-list"></div>
+
+    <!-- Movie Details Section -->
+    <div id="movie-details" class="movie-details" style="display: none;">
+      <img id="movie-image" src="" alt="Movie Image" />
+      <h2 id="movie-title"></h2>
+      <p><strong>Release Date:</strong> <span id="release-date"></span></p>
+      <p><strong>Runtime:</strong> <span id="runtime"></span> minutes</p>
+      <p><strong>Tagline:</strong> <span id="movie-tagline"></span></p>
+      <p><strong>Rating:</strong> <span id="vote-average"></span></p>
+      <button class="back-button" onclick="goBack()">Back to List</button>
+    </div>
+
+    <footer style="text-align: center; margin-top: 20px;">
+      <p>&copy; 2025 Movie Finder. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+      // Sample Movie Data (This can be replaced with API call if needed)
+      const movieData = [
+        {
+          id: 1,
+          title: 'Pooja',
+          tagline: 'A thrilling journey',
+          vote_average: 7.9,
+          release_date: '2025-01-01',
+          runtime: 120,
+          image: 'https://via.placeholder.com/300x450?text=Pooja',
+        },
+        {
+          id: 2,
+          title: 'The Dark Knight',
+          tagline: 'Why So Serious?',
+          vote_average: 8.4,
+          release_date: '2008-07-18',
+          runtime: 152,
+          image: 'https://via.placeholder.com/300x450?text=The+Dark+Knight',
+        },
+        {
+          id: 3,
+          title: 'Inception',
+          tagline: 'Your mind is the scene of the crime.',
+          vote_average: 8.8,
+          release_date: '2010-07-16',
+          runtime: 148,
+          image: 'https://via.placeholder.com/300x450?text=Inception',
+        },
+        {
+          id: 4,
+          title: 'Interstellar',
+          tagline: 'Mankind was born on Earth. It was never meant to die here.',
+          vote_average: 8.6,
+          release_date: '2014-11-07',
+          runtime: 169,
+          image: 'https://via.placeholder.com/300x450?text=Interstellar',
+        },
+      ];
+
+      // Global movie list to search and display
+      let movies = movieData;
+
+      // Fetch Movies and render them
+      function renderMoviesList(filteredMovies) {
+        const app = document.getElementById('app');
+        app.innerHTML = ''; // Clear previous content
+
+        filteredMovies.forEach((movie) => {
+          const card = document.createElement('div');
+          card.classList.add('movie-card');
+          card.innerHTML = `
+            <img src="${movie.image}" alt="${movie.title}" />
+            <h3>${movie.title}</h3>
+            <p>${movie.tagline}</p>
+            <p>Rating: ${movie.vote_average}</p>
+          `;
+          card.onclick = () => showMovieDetails(movie.id);
+          app.appendChild(card);
+        });
+      }
+
+      // Show Movie Details
+      function showMovieDetails(movieId) {
+        const movie = movies.find((m) => m.id === movieId);
+        if (movie) {
+          document.getElementById('movie-image').src = movie.image;
+          document.getElementById('movie-title').innerText = movie.title;
+          document.getElementById('release-date').innerText = new Date(
+            movie.release_date
+          ).toLocaleDateString();
+          document.getElementById('runtime').innerText = movie.runtime;
+          document.getElementById('movie-tagline').innerText = movie.tagline;
+          document.getElementById('vote-average').innerText = movie.vote_average;
+
+          // Hide list and show movie details
+          document.getElementById('app').style.display = 'none';
+          document.getElementById('movie-details').style.display = 'block';
+        }
+      }
+
+      // Go Back to Movie List
+      function goBack() {
+        document.getElementById('movie-details').style.display = 'none';
+        document.getElementById('app').style.display = 'grid';
+      }
+
+      // Search Movies
+      function searchMovie() {
+        const query = document.getElementById('search-box').value.toLowerCase();
+        const filteredMovies = movies.filter((movie) =>
+          movie.title.toLowerCase().includes(query)
+        );
+        renderMoviesList(filteredMovies);
+      }
+
+      // Initialize the app on load
+      window.onload = () => renderMoviesList(movies);
+    </script>
+  </body>
+</html>
